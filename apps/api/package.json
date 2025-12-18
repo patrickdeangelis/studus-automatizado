@@ -19,8 +19,7 @@
     "bullmq": "^5.0.0",
     "drizzle-orm": "^0.29.0",
     "elysia": "latest",
-    "ioredis": "^5.8.2",
-    "playwright": "^1.57.0"
+    "ioredis": "^5.8.2"
   },
   "devDependencies": {
     "bun-types": "latest",

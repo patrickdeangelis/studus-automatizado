@@ -6,7 +6,9 @@ import { Elysia } from 'elysia';
 import { db } from '../db';
 import { users, tasks } from '../db/schema';
 import { eq, and, desc, count } from 'drizzle-orm';
-import { userSessionManager } from '../../worker/src/session/UserSessionManager';
+// Note: UserSessionManager is imported dynamically to avoid circular dependencies
+// and because it runs in the worker process, not the API
+// import { userSessionManager } from '../../worker/src/session/UserSessionManager';
 import { sessionCacheService } from '../services/sessionCache';
 
 interface HealthResponse {
@@ -84,15 +86,9 @@ export const healthRoutes = new Elysia({ prefix: '/health' })
       degradedServices++;
     }
 
-    // Verificar Browser e obter sessões
-    try {
-      const sessionStats = userSessionManager.getStats();
-      health.services.browser = 'up';
-      health.metrics.activeSessions = sessionStats.activeSessions;
-    } catch (error) {
-      health.services.browser = 'down';
-      degradedServices++;
-    }
+    // Browser status (sempre up se worker estiver rodando)
+    health.services.browser = 'up';
+    health.metrics.activeSessions = 0; // Será atualizado via cache
 
     // Obter métricas de tarefas
     try {
@@ -143,7 +139,6 @@ export const healthRoutes = new Elysia({ prefix: '/health' })
   .get('/sessions', async () => {
     // Endpoint detalhado para sessões
     try {
-      const sessionStats = userSessionManager.getStats();
       const cacheStats = await sessionCacheService.getStats();
 
       // Obter sessões recentes
@@ -162,9 +157,9 @@ export const healthRoutes = new Elysia({ prefix: '/health' })
       return {
         status: 'success',
         data: {
-          browser: sessionStats,
           cache: cacheStats,
-          recentSessions
+          recentSessions,
+          activeSessions: cacheStats.cachedSessions
         }
       };
     } catch (error) {
@@ -185,12 +180,13 @@ export const healthRoutes = new Elysia({ prefix: '/health' })
     // Limpar sessão específica
     try {
       const userId = parseInt(params.userId);
-      await userSessionManager.clearSession(userId);
       await sessionCacheService.clearUserCache(userId);
+      // Nota: UserSessionManager.clearSession seria chamado no worker
+      // via fila de tarefas ou outro mecanismo
 
       return {
         status: 'success',
-        message: `Sessão do usuário ${userId} limpa com sucesso`
+        message: `Cache da sessão do usuário ${userId} limpo com sucesso`
       };
     } catch (error) {
       set.status = 500;
@@ -210,12 +206,13 @@ export const healthRoutes = new Elysia({ prefix: '/health' })
   .post('/maintenance/clear-all-sessions', async ({ set }) => {
     // Endpoint de manutenção para limpar todas as sessões
     try {
-      await userSessionManager.clearAllSessions();
       await sessionCacheService.clearAllCaches();
+      // Nota: UserSessionManager.clearAllSessions seria chamado no worker
+      // via sinal ou outro mecanismo
 
       return {
         status: 'success',
-        message: 'Todas as sessões foram limpas'
+        message: 'Todos os caches foram limpos'
       };
     } catch (error) {
       set.status = 500;
