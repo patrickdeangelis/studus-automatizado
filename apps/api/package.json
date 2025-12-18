@@ -1,0 +1,29 @@
+{
+  "name": "@studus/api",
+  "version": "1.0.0",
+  "module": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "dev": "bun run --watch src/index.ts",
+    "db:generate": "drizzle-kit generate:sqlite",
+    "db:push": "drizzle-kit push:sqlite",
+    "db:migrate": "bun run src/db/migrate_to_multitenancy.ts",
+    "db:seed": "bun run src/db/seed.ts"
+  },
+  "dependencies": {
+    "@elysiajs/cors": "latest",
+    "@elysiajs/swagger": "latest",
+    "@studus/shared": "workspace:*",
+    "@types/ioredis": "^5.0.0",
+    "bullmq": "^5.0.0",
+    "drizzle-orm": "^0.29.0",
+    "elysia": "latest",
+    "ioredis": "^5.8.2",
+    "playwright": "^1.57.0"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "drizzle-kit": "^0.20.0"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@studus/worker",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/worker.ts",
+    "dev": "bun run --watch src/worker.ts"
+  },
+  "dependencies": {
+    "@studus/shared": "workspace:*",
+    "@types/jsonwebtoken": "^9.0.10",
+    "bullmq": "^5.0.0",
+    "drizzle-orm": "^0.29.0",
+    "ioredis": "^5.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "playwright": "^1.40.0"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  }
+}

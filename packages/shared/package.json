@@ -1,0 +1,9 @@
+{
+  "name": "@studus/shared",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "devDependencies": {
+    "bun-types": "latest",
+    "typescript": "^5.0.0"
+  }
+}
